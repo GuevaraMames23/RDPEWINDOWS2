@@ -27,7 +27,9 @@ jobs:
             exit 1
         }
 
-    - run: Set-WinUserLanguageList -LanguageList tr, en-US -Force
+    - run: |
+        $LanguageList = New-Object -TypeName Microsoft.InternationalSettings.Commands.WinUserLanguageList -ArgumentList 'tr-TR', 'en-US'
+        Set-WinUserLanguageList -LanguageList $LanguageList -Force
          
     - run: Invoke-WebRequest https://github.com/CI-Devs/Windows-RDP-ACTIONS/raw/main/send_telegram.ps1 -OutFile C:\send_telegram.ps1
     
