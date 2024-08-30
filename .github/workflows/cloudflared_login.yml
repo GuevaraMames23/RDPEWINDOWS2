@@ -5,6 +5,9 @@ jobs:
   build:
     runs-on: windows-latest
 
+    env:
+      PASSWORD: ${{ secrets.PASSWORD || 'DefaultPassword123!' }}
+
     steps:
     - name: Download
       run: Invoke-WebRequest https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -OutFile cloudflared.exe
@@ -16,8 +19,14 @@ jobs:
     
     - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
     
-    - run: Set-LocalUser -Name 'runneradmin' -Password (ConvertTo-SecureString -AsPlainText '${{ secrets.PASSWORD }}' -Force)
-    
+    - run: |
+        if (-not [string]::IsNullOrEmpty('${{ env.PASSWORD }}')) {
+            Set-LocalUser -Name 'runneradmin' -Password (ConvertTo-SecureString -AsPlainText '${{ env.PASSWORD }}' -Force)
+        } else {
+            Write-Error "The password cannot be empty."
+            exit 1
+        }
+
     - run: Set-WinUserLanguageList -LanguageList tr, en-US -Force
          
     - run: Invoke-WebRequest https://github.com/CI-Devs/Windows-RDP-ACTIONS/raw/main/send_telegram.ps1 -OutFile C:\send_telegram.ps1
