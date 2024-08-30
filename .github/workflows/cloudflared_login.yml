@@ -1,50 +1,22 @@
-name: cloudflared_login
-on: [workflow_dispatch]
+name: Programmingwithkumaresan
+
+on:
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Start Building...
     runs-on: windows-latest
-
-    env:
-      PASSWORD: ${{ secrets.PASSWORD || 'DefaultPassword123!' }}
-
+    timeout-minutes: 9999
+    
     steps:
-    - name: Download
-      run: Invoke-WebRequest https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -OutFile cloudflared.exe
-    
-    - name: Enable TS
-      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
-    
-    - run: Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
-    
-    - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
-    
-    - run: |
-        if (-not [string]::IsNullOrEmpty('${{ env.PASSWORD }}')) {
-            Set-LocalUser -Name 'runneradmin' -Password (ConvertTo-SecureString -AsPlainText '${{ env.PASSWORD }}' -Force)
-        } else {
-            Write-Error "The password cannot be empty."
-            exit 1
-        }
+      - name: Downloading & Installing Essentials
+        run: |
+          Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
+          cmd /c Downloads.bat
 
-    - run: Import-Module -Name International -UseWindowsPowerShell -Verbose
-    - run: |
-        Set-WinUserLanguageList -LanguageList "en-US" -Force
-         
-    - run: Invoke-WebRequest https://github.com/CI-Devs/Windows-RDP-ACTIONS/raw/main/send_telegram.ps1 -OutFile C:\send_telegram.ps1
-    
-    - name: cloudflared Login
-      run: Start-Process -FilePath '.\cloudflared.exe' -ArgumentList 'login' -RedirectStandardError 'C:\cloudflared.txt'
-    
-    - run: Start-Sleep -s 10 
-    
-    - run: |
-        Get-Content C:\cloudflared.txt | ForEach-Object {
-          $URLString = ((Select-String '(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})' -InputObject $_).Matches.Value)
-          if ($URLString) {
-            C:\send_telegram.ps1 '${{ secrets.TG_TOKEN }}' '${{ secrets.TG_CHAT_ID }}' ($URLString -split 'https://')[1]
-            break
-          }
-        }
-    
-    - run: .\cloudflared.exe --hostname '${{ secrets.CF_DOMAIN }}' --url rdp://localhost:3389
+      - name: Connect to LiteManager
+        run: cmd /c show.bat
+
+      - name: Time Counter
+        run: cmd /c loop.bat
